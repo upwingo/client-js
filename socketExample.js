@@ -11,19 +11,15 @@ const markets = [
 ];
 const timeFrame = 10; // sec.
 const options = {
-    hostname  : "ws.upwingo.com",
-    port      : "443",
-    secure    : "true"
+    hostname  : 'ws.upwingo.com',
+    port      : '443',
+    secure    : 'true'
 };
 
 const conn = socketCluster.connect(options);
 
 conn.on('connect', (status) => {
     console.log(status);
-
-    conn.on('error', (err) => {
-        console.error(err);
-    });
 
     // candles channel
     // CANDLES--{EXCHANGE}-{SYMBOL}--{TIMEFRAME} - channel template
@@ -32,9 +28,11 @@ conn.on('connect', (status) => {
         conn.subscribe(channelName).watch((data) => {
             let candles = data.candles || [];
             candles.forEach((candle) => {
-                candle = candle.split(',')
-                console.log("dateTime=%s open=%s high=%s low=%s close=%s vol=%s",
-                new Date(candle[0] * 1000).toUTCString(), candle[1], candle[2], candle[3], candle[4], candle[5])
+                candle = candle.split(',');
+                console.log(
+                    'dateTime=%s open=%s high=%s low=%s close=%s vol=%s',
+                    new Date(candle[0] * 1000).toUTCString(), candle[1], candle[2], candle[3], candle[4], candle[5]
+                );
             })
         })
     });
@@ -60,6 +58,10 @@ conn.on('connect', (status) => {
     });
 });
 
+conn.on('error', (err) => {
+    console.error(err);
+});
+
 conn.on('disconnect', () => {
     console.log('disconnect')
 });
@@ -74,10 +76,6 @@ conn.on('connectAbort', () => {
 
 conn.on('close', () => {
     console.log('close')
-});
-
-conn.on('disconnect', () => {
-    console.log('disconnect')
 });
 
 
