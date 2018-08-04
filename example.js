@@ -5,4 +5,7 @@ upwingo = new Upwingo({
     api_key: "XXX"
 });
 
-new BotSimple(upwingo).run();
+new BotSimple(
+    upwingo,
+    "bina", "btc_usdt", 10, "micro", "FREE", 10.0
+).run();

@@ -28,30 +28,13 @@ class Upwingo {
      * @param onTick
      * @param reconnect
      */
-    ticker (channels, onTick, reconnect = false) {
-        let active = true;
-
+    ticker (channels, onTick, reconnect = true) {
         const conn = socketCluster.connect({
             hostname: this._config.ws_host,
             port: this._config.ws_port,
-            secure: this._config.secure
+            secure: this._config.secure,
+            autoReconnect: reconnect
         });
-
-        const re = () => {
-            if (!reconnect || !active) {
-                return;
-            }
-
-            console.log("%s: upwingo: wait for reconnect")
-
-            setTimeout(() => {
-                try {
-                    conn.connect();
-                } catch (e) {
-                    // ignore
-                }
-            }, 30000);
-        };
 
         conn.on("connect", () => {
             if (typeof channels.forEach === 'undefined') {
@@ -61,7 +44,6 @@ class Upwingo {
             channels.forEach((channel) => {
                 conn.subscribe(channel).watch((data) => {
                     if (onTick(data) === false) {
-                        active = false;
                         conn.disconnect();
                     }
                 });
@@ -74,17 +56,14 @@ class Upwingo {
 
         conn.on("disconnect", () => {
             console.log("%s: upwingo: disconnect", new Date().toUTCString());
-            re()
         });
 
         conn.on("kickOut", () => {
             console.log("%s: upwingo: kickOut", new Date().toUTCString());
-            re();
         });
 
         conn.on("connectAbort", () => {
             console.log("%s: upwingo: abort", new Date().toUTCString());
-            re();
         });
 
         conn.on("close", () => {
@@ -173,7 +152,7 @@ class Upwingo {
 
         return fetch(url, options).then(data => data.json()).then((data) => {
             if (data.code !== 200) {
-                throw new Error(`Code ${data.code}: ` + JSON.stringify(data));
+                throw new Error(`code ${data.code}: ` + JSON.stringify(data));
             }
 
             return data;
